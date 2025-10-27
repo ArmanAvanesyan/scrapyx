@@ -64,16 +64,23 @@ class CompletionPublisherExtension:
                 project=self.crawler.settings.get("BOT_NAME", "unknown"),
             )
             
-            async def publish_async():
-                """Publish event asynchronously."""
-                broker = self._get_broker()
-                await broker.publish(event.model_dump(), queue="spider.completion")
-                logger.info(f"Published completion event for job {event.job_id}: {event.status}")
-            
-            def run_in_thread():
-                """Run async code in a new thread with its own event loop."""
+            # Use a thread to avoid blocking and event loop conflicts
+            def publish_in_thread():
+                """Publish event in a separate thread with its own event loop."""
+                # Create a new event loop for this thread
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
+                
+                async def publish_async():
+                    """Publish event asynchronously."""
+                    broker = self._get_broker()
+                    await broker.start()
+                    try:
+                        await broker.publish(event.model_dump(), queue="spider.completion")
+                        logger.info(f"Published completion event for job {event.job_id}: {event.status}")
+                    finally:
+                        await broker.close()
+                
                 try:
                     loop.run_until_complete(publish_async())
                 except Exception as e:
@@ -81,10 +88,11 @@ class CompletionPublisherExtension:
                 finally:
                     loop.close()
             
-            # Always run in a thread to avoid event loop conflicts
-            thread = threading.Thread(target=run_in_thread, daemon=True)
+            # Run in a daemon thread to not block
+            thread = threading.Thread(target=publish_in_thread, daemon=True)
             thread.start()
+            # Give it a moment to publish
             thread.join(timeout=10)
                  
         except Exception as e:
-            logger.error(f"Error publishing completion event: {e}", exc_info=True)
+            logger.error(f"Error in spider_closed: {e}", exc_info=True)
