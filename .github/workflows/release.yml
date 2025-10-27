@@ -60,14 +60,14 @@ jobs:
             if [ -f "$pkg_dir/pyproject.toml" ]; then
               echo "Building package in $pkg_dir"
               cd "$pkg_dir"
-              uv run python -m build --outdir ../../dist/
+              ../.venv/bin/python -m build --outdir ../../dist/
               cd ../..
             fi
           done
 
       - name: Check packages
         run: |
-          uv run twine check dist/*
+          .venv/bin/twine check dist/*
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
