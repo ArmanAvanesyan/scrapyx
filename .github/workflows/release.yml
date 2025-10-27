@@ -60,7 +60,7 @@ jobs:
             if [ -f "$pkg_dir/pyproject.toml" ]; then
               echo "Building package in $pkg_dir"
               cd "$pkg_dir"
-              ../.venv/bin/python -m build --outdir ../../dist/
+              ../../.venv/bin/python -m build --outdir ../../dist/
               cd ../..
             fi
           done
