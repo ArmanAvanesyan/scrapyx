@@ -1,0 +1,101 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Note: environment will need to be created in GitHub Settings > Environments
+    environment: pypi
+    permissions:
+      contents: write
+      id-token: write  # Required for OIDC authentication to PyPI
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.8.0"
+
+      - name: Cache UV dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+          key: ${{ runner.os }}-uv-release-${{ hashFiles('**/pyproject.toml', '**/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-release-
+
+      - name: Install build tools
+        run: |
+          uv pip install build twine
+
+      - name: Check version consistency
+        run: |
+          python tools/check_version_tag.py
+
+      - name: Build all packages
+        run: |
+          mkdir -p dist
+          for pkg_dir in packages/*/; do
+            if [ -f "$pkg_dir/pyproject.toml" ]; then
+              echo "Building package in $pkg_dir"
+              cd "$pkg_dir"
+              uv run python -m build --outdir ../../dist/
+              cd ../..
+            fi
+          done
+
+      - name: Check packages
+        run: |
+          uv run twine check dist/*
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+        # Optionally, if using an API token instead of trusted publishers:
+        # env:
+        #   TWINE_USERNAME: __token__
+        #   TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Create GitHub Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Release ${{ github.ref_name }}
+            
+            Packages published to PyPI: scrapyx-pkgs, scrapyx-core, scrapyx-mw
+            
+            ## Installation
+            
+            ```bash
+            # Install everything (recommended)
+            pip install scrapyx-pkgs
+            
+            # Or install specific components
+            pip install scrapyx-pkgs[core]  # Just scrapyx-core
+            pip install scrapyx-pkgs[mw]     # Just scrapyx-mw
+            ```
+          overwrite_files: true
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
