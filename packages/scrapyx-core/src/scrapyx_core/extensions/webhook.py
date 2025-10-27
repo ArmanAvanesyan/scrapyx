@@ -6,6 +6,7 @@ Does NOT interfere with callback_url from requests.
 
 import logging
 import asyncio
+import threading
 from typing import Any, Optional, Dict
 from scrapy import signals
 from scrapy.crawler import Crawler
@@ -133,23 +134,23 @@ class WebhookExtension:
                 response.raise_for_status()
                 logger.debug(f"Webhook sent successfully: {response.status_code}")
         
-        try:
+        def run_in_thread():
+            """Run async code in a new thread with its own event loop."""
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
             try:
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-            
-            loop.run_until_complete(_async_send())
-        except httpx.HTTPStatusError as e:
-            logger.warning(
-                f"HTTP error sending webhook: {e.response.status_code} - {e.response.text[:200]}"
-            )
-            raise
-        except httpx.RequestError as e:
-            logger.warning(f"Request error sending webhook: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"Unexpected error sending webhook: {e}", exc_info=True)
-            raise
+                loop.run_until_complete(_async_send())
+            finally:
+                loop.close()
+        
+        # Check if there's a running event loop
+        try:
+            _ = asyncio.get_running_loop()  # Detect if we're in a running loop
+            # If we're here, there's a running loop, so run in a thread
+            thread = threading.Thread(target=run_in_thread, daemon=True)
+            thread.start()
+            thread.join(timeout=10)  # Wait up to 10 seconds
+        except RuntimeError:
+            # No running loop, we can run directly
+            run_in_thread()
 
