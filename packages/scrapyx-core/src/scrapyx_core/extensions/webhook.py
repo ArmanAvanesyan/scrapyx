@@ -7,7 +7,7 @@ Does NOT interfere with callback_url from requests.
 import logging
 import asyncio
 import threading
-from typing import Any, Optional, Dict
+from typing import Any, Optional
 from scrapy import signals
 from scrapy.crawler import Crawler
 import httpx
@@ -143,14 +143,8 @@ class WebhookExtension:
             finally:
                 loop.close()
         
-        # Check if there's a running event loop
-        try:
-            _ = asyncio.get_running_loop()  # Detect if we're in a running loop
-            # If we're here, there's a running loop, so run in a thread
-            thread = threading.Thread(target=run_in_thread, daemon=True)
-            thread.start()
-            thread.join(timeout=10)  # Wait up to 10 seconds
-        except RuntimeError:
-            # No running loop, we can run directly
-            run_in_thread()
+        # Always run in a thread to avoid event loop conflicts
+        thread = threading.Thread(target=run_in_thread, daemon=True)
+        thread.start()
+        thread.join(timeout=10)
 
