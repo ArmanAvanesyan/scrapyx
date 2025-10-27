@@ -41,13 +41,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-uv-release-
 
+      - name: Create virtual environment
+        run: |
+          uv venv
+
       - name: Install build tools
         run: |
           uv pip install build twine
 
       - name: Check version consistency
         run: |
-          python tools/check_version_tag.py
+          uv run python tools/check_version_tag.py
 
       - name: Build all packages
         run: |
