@@ -1,6 +1,6 @@
 [project]
 name = "scrapyx-mw"
-version = "0.1.0"
+version = "0.1.1"
 description = "Composable Scrapy middlewares: API/session headers, debug, captcha polling/webhook, proxy rotation, smart retry."
 authors = [{ name = "Your Org" }]
 readme = "README.md"

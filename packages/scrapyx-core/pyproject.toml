@@ -1,6 +1,6 @@
 [project]
 name = "scrapyx-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Shared Scrapy base spider + typed service configuration registry"
 readme = "README.md"
 requires-python = ">=3.10"
