@@ -30,6 +30,7 @@ try:
     CURL_CFFI_AVAILABLE = True
 except ImportError:
     CURL_CFFI_AVAILABLE = False
+    curl_requests = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 

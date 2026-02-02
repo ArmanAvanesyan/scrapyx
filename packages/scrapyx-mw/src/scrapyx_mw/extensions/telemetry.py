@@ -61,18 +61,20 @@ class TelemetryExtension:
             )
 
             # Emit to stats
-            self.stats.set_value("captcha/attempts", total)
-            self.stats.set_value("captcha/successes", self.solve_successes)
-            self.stats.set_value("captcha/failures", self.solve_failures)
-            self.stats.set_value("captcha/success_rate_pct", success_rate)
-            self.stats.set_value("captcha/avg_solve_time_sec", avg_time)
-            self.stats.set_value("captcha/total_time_sec", self.total_solve_time)
+            if self.stats:
+                self.stats.set_value("captcha/attempts", total)
+                self.stats.set_value("captcha/successes", self.solve_successes)
+                self.stats.set_value("captcha/failures", self.solve_failures)
+                self.stats.set_value("captcha/success_rate_pct", success_rate)
+                self.stats.set_value("captcha/avg_solve_time_sec", avg_time)
+                self.stats.set_value("captcha/total_time_sec", self.total_solve_time)
 
     def record_solve_start(self, captcha_id: str) -> None:
         """Record the start of a captcha solve attempt."""
         self.solve_attempts += 1
         self.solve_start_times[captcha_id] = time.time()
-        self.stats.inc_value("captcha/attempts")
+        if self.stats:
+            self.stats.inc_value("captcha/attempts")
 
     def record_solve_success(self, captcha_id: str) -> None:
         """Record a successful captcha solve."""
@@ -80,13 +82,15 @@ class TelemetryExtension:
         if captcha_id in self.solve_start_times:
             solve_time = time.time() - self.solve_start_times.pop(captcha_id)
             self.total_solve_time += solve_time
-            self.stats.inc_value("captcha/successes")
-            self.stats.set_value("captcha/last_solve_time_sec", solve_time)
+            if self.stats:
+                self.stats.inc_value("captcha/successes")
+                self.stats.set_value("captcha/last_solve_time_sec", solve_time)
 
     def record_solve_failure(self, captcha_id: str, error: str) -> None:
         """Record a failed captcha solve attempt."""
         self.solve_failures += 1
         if captcha_id in self.solve_start_times:
             self.solve_start_times.pop(captcha_id)
-        self.stats.inc_value("captcha/failures")
-        self.stats.inc_value(f"captcha/failures/{error}", 1)
+        if self.stats:
+            self.stats.inc_value("captcha/failures")
+            self.stats.inc_value(f"captcha/failures/{error}", 1)

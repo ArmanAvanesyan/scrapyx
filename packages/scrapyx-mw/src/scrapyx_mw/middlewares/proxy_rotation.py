@@ -86,7 +86,7 @@ class ProxyRotationMiddleware:
         """Validate proxy URL format."""
         try:
             parsed = urlparse(proxy)
-            return (
+            return bool(
                 parsed.scheme in ["http", "https", "socks4", "socks5"]
                 and parsed.hostname
             )

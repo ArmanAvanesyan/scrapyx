@@ -148,11 +148,12 @@ class GuardrailsExtension:
             )
             raise CloseSpider("Budget limit exceeded")
 
-        self.stats.set_value("captcha/total_spend", self.total_spend)
-        self.stats.set_value(
-            "captcha/remaining_budget",
-            max(0, self.max_spend_per_day - self.total_spend),
-        )
+        if self.stats:
+            self.stats.set_value("captcha/total_spend", self.total_spend)
+            self.stats.set_value(
+                "captcha/remaining_budget",
+                max(0, self.max_spend_per_day - self.total_spend),
+            )
 
     def record_failure(self) -> None:
         """Record a failure for circuit breaker."""

@@ -64,8 +64,8 @@ class WebhookHandler(BaseHTTPRequestHandler):
         else:
             self.send_error(404, "Not Found")
 
-    def log_message(self, fmt, *args):
-        logger.info("%s - " + fmt, self.address_string(), *args)
+    def log_message(self, format: str, *args: object) -> None:
+        logger.info("%s - " + format, self.address_string(), *args)
 
     def _store(self, captcha_id: str, solution: str):
         try:

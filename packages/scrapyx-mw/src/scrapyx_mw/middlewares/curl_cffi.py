@@ -29,6 +29,7 @@ try:
     CURL_CFFI_AVAILABLE = True
 except ImportError:
     CURL_CFFI_AVAILABLE = False
+    curl_requests = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +107,8 @@ class CurlCffiMiddleware:
             else:
                 kwargs["data"] = request.body
 
+        if not CURL_CFFI_AVAILABLE or curl_requests is None:
+            return None
         try:
             # Make request with curl_cffi
             curl_response = curl_requests.request(

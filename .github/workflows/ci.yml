@@ -53,7 +53,7 @@ jobs:
 
       - name: Pyright (scrapyx-mw)
         run: |
-          cd packages/scrapyx-mw && uv run pyright src/
+          cd packages/scrapyx-mw && uv sync --extra dev --extra curl-cffi && uv run pyright src/
 
       - name: Bandit (scrapyx-core)
         run: |

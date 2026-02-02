@@ -1,7 +1,7 @@
 from __future__ import annotations
 import random
 import time
-from typing import Any
+from typing import Any, Optional
 from twisted.internet import defer, reactor
 from twisted.web.client import Agent, HTTPConnectionPool
 from scrapy import signals
@@ -147,6 +147,7 @@ class AsyncCaptchaMiddleware:
             cid = yield self.provider.submit(site_key, url, is_invisible=is_invisible)
             start = time.time()
             delay = self.poll_initial
+            sol: Optional[str] = None
             while True:
                 if time.time() - start > self.poll_total:
                     raise TransientCaptchaError("Captcha polling timeout")
