@@ -44,10 +44,13 @@ class ScrapyxAddon:
         # Helper getters with defaults
         def getbool(k, d):
             return settings.getbool(k, d)
+
         def getstr(k, d):
             return settings.get(k, d)
+
         def getint(k, d):
             return int(settings.getint(k, d))
+
         def getflt(k, d):
             return float(settings.getfloat(k, d))
 
