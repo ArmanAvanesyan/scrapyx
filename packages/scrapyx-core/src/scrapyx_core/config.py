@@ -36,6 +36,8 @@ class ServiceRegistry(BaseModel):
         key = (spider_name or "").upper()
         if key not in self.services:
             from .errors import MissingServiceError
-            raise MissingServiceError(f"No service configuration for spider '{spider_name}' (key '{key}').")
-        return self.services[key]
 
+            raise MissingServiceError(
+                f"No service configuration for spider '{spider_name}' (key '{key}')."
+            )
+        return self.services[key]

@@ -8,12 +8,14 @@ __all__: list[str] = []
 
 try:
     from .webhook import WebhookExtension
+
     __all__.append("WebhookExtension")
 except ImportError:
     WebhookExtension = None  # type: ignore[misc, assignment]
 
 try:
     from .completion_publisher import CompletionPublisherExtension
+
     __all__.append("CompletionPublisherExtension")
 except ImportError:
     CompletionPublisherExtension = None  # type: ignore[misc, assignment]

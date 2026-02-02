@@ -25,7 +25,9 @@ class BaseServiceSpider(scrapy.Spider):
     _captcha_needed: bool = False
     _site_key: Optional[str] = None
 
-    def __init__(self, name: Optional[str] = None, _job: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, name: Optional[str] = None, _job: Optional[str] = None, **kwargs: Any
+    ) -> None:
         super().__init__(name=name, **kwargs)
         self.job_id: Optional[str] = _job
         self.cookiejar_key: str = str(uuid.uuid4())
@@ -100,4 +102,3 @@ class BaseServiceSpider(scrapy.Spider):
             "items": self.items,
             "errors": self.errors,
         }
-

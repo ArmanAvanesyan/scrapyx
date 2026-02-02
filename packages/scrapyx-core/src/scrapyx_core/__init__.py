@@ -10,4 +10,3 @@ __all__ = [
     "load_registry_from_settings",
     "validators",
 ]
-

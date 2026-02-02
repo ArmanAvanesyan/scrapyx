@@ -29,7 +29,10 @@ def validate_captcha_settings(settings: Any) -> Iterable[Tuple[str, str]]:
 
     # Optional: basic provider set
     if provider not in {"2captcha", "capsolver"}:
-        yield ("warn", f"Unknown CAPTCHA_PROVIDER='{provider}'. Expected one of: 2captcha, capsolver")
+        yield (
+            "warn",
+            f"Unknown CAPTCHA_PROVIDER='{provider}'. Expected one of: 2captcha, capsolver",
+        )
 
 
 def validate_services_registry(registry: ServiceRegistry) -> Iterable[Tuple[str, str]]:
@@ -38,5 +41,7 @@ def validate_services_registry(registry: ServiceRegistry) -> Iterable[Tuple[str,
     """
     for name, cfg in (registry.services or {}).items():
         if bool(cfg.CAPTCHA_REQUIRED) and _is_blank(cfg.SITE_KEY):
-            yield ("error", f"SERVICES[{name}]: CAPTCHA_REQUIRED=True but SITE_KEY is missing/blank")
-
+            yield (
+                "error",
+                f"SERVICES[{name}]: CAPTCHA_REQUIRED=True but SITE_KEY is missing/blank",
+            )

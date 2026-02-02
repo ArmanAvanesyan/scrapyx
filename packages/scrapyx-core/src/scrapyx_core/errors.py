@@ -4,4 +4,3 @@ class ConfigError(RuntimeError):
 
 class MissingServiceError(KeyError):
     """Raised when a spider has no matching SERVICE entry."""
-

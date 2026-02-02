@@ -37,4 +37,3 @@ def load_registry_from_settings(settings: Any) -> ServiceRegistry:
     merged.update(settings_services)  # settings override file
 
     return ServiceRegistry(services=_coerce_raw_services(merged))
-
