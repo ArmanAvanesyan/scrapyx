@@ -48,18 +48,14 @@ class TestApiRequestMiddleware:
 
     @pytest.fixture
     def middleware(self):
-        """Create an API request middleware instance."""
-        settings = MagicMock()
-        settings.get.return_value = {}
-
-        middleware = ApiRequestMiddleware(settings)
-        return middleware
+        """Create an API request middleware instance (uses from_crawler in production)."""
+        return ApiRequestMiddleware()
 
     def test_process_request_with_api_headers(self, middleware):
-        """Test request processing with API headers."""
+        """Test request processing with API headers (service_config['HEADERS'])."""
         request = Request("http://example.com")
         spider = MagicMock()
-        spider.service_config = {"API_HEADERS": {"X-API-Key": "secret"}}
+        spider.service_config = {"HEADERS": {"X-API-Key": "secret"}}
 
         result = middleware.process_request(request, spider)
         assert result is None
@@ -82,10 +78,7 @@ class TestDebugRequestMiddleware:
     @pytest.fixture
     def middleware(self):
         """Create a debug middleware instance."""
-        settings = MagicMock()
-
-        middleware = DebugRequestMiddleware(settings)
-        return middleware
+        return DebugRequestMiddleware()
 
     def test_process_request_logging(self, middleware):
         """Test request processing with debug logging."""
@@ -95,4 +88,4 @@ class TestDebugRequestMiddleware:
 
         result = middleware.process_request(request, spider)
         assert result is None
-        spider.logger.debug.assert_called_once()
+        assert spider.logger.debug.call_count == 2  # method+url, then headers+meta

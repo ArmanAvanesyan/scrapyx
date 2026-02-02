@@ -113,17 +113,28 @@ class AsyncCaptchaMiddleware:
             self.cache.pop(k, None)
 
         if k in self.inflight:
+            # Wait on a tee of the shared Deferred so we get the solution;
+            # chaining would pass the first callback's return value (None) to us.
+            wait_d = defer.Deferred()
+            self.inflight[k].addCallbacks(
+                wait_d.callback,
+                wait_d.errback,
+            )
             try:
-                sol = yield self.inflight[k]
+                sol = yield wait_d
             except Exception:
                 yield self._sleep(1.0)
-                defer.returnValue(request.replace(dont_filter=True))
+                return (request.replace(dont_filter=True))
             else:
                 request.meta["recaptcha_solution"] = sol
-                defer.returnValue(None)
+                return (None)
 
         d = self._solve(site_key, request.url, spider)
-        self.inflight[k] = d
+        # Tee so owner gets sol via yield d; waiters get sol via inflight[k].
+        shared = defer.Deferred()
+        d.addCallback(lambda sol: (shared.callback(sol), sol)[1])
+        d.addErrback(lambda err: (shared.errback(err), err)[1])
+        self.inflight[k] = shared
         try:
             sol = yield d
         finally:
@@ -132,7 +143,7 @@ class AsyncCaptchaMiddleware:
         request.meta["recaptcha_solution"] = sol
         if getattr(spider, "reset_captcha_flag", True):
             spider.captcha_needed = False
-        defer.returnValue(None)
+        return (None)
 
     @defer.inlineCallbacks
     def _solve(self, site_key, url, spider):
@@ -158,7 +169,7 @@ class AsyncCaptchaMiddleware:
                 except TransientCaptchaError:
                     pass
                 if sol:
-                    defer.returnValue(sol)
+                    return (sol)
                 jitter = random.uniform(-0.5, 0.5)
                 delay = min(self.poll_max, max(1.0, delay * 1.6 + jitter))
                 yield self._sleep(delay)
