@@ -56,7 +56,7 @@ class CompletionPublisherExtension:
         try:
             # Build event
             event = SpiderCompletionEvent(
-                job_id=getattr(spider, "job_id", None),
+                job_id=(getattr(spider, "job_id", None) or ""),
                 spider_name=spider.name,
                 status="success" if reason == "finished" else "failed",
                 reason=reason,
@@ -77,7 +77,9 @@ class CompletionPublisherExtension:
                     broker = self._get_broker()
                     await broker.start()
                     try:
-                        await broker.publish(event.model_dump(), queue="spider.completion")
+                        await broker.publish(  # type: ignore[reportCallIssue]
+                            event.model_dump(), queue="spider.completion"
+                        )
                         logger.info(
                             f"Published completion event for job {event.job_id}: {event.status}"
                         )

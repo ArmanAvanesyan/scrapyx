@@ -49,7 +49,7 @@ jobs:
 
       - name: Pyright (scrapyx-core)
         run: |
-          cd packages/scrapyx-core && uv run pyright src/
+          cd packages/scrapyx-core && uv sync --extra webhook --extra completion && uv run pyright src/
 
       - name: Pyright (scrapyx-mw)
         run: |
