@@ -124,10 +124,10 @@ class AsyncCaptchaMiddleware:
                 sol = yield wait_d
             except Exception:
                 yield self._sleep(1.0)
-                return (request.replace(dont_filter=True))
+                return request.replace(dont_filter=True)
             else:
                 request.meta["recaptcha_solution"] = sol
-                return (None)
+                return None
 
         d = self._solve(site_key, request.url, spider)
         # Tee so owner gets sol via yield d; waiters get sol via inflight[k].
@@ -143,7 +143,7 @@ class AsyncCaptchaMiddleware:
         request.meta["recaptcha_solution"] = sol
         if getattr(spider, "reset_captcha_flag", True):
             spider.captcha_needed = False
-        return (None)
+        return None
 
     @defer.inlineCallbacks
     def _solve(self, site_key, url, spider):
@@ -169,7 +169,7 @@ class AsyncCaptchaMiddleware:
                 except TransientCaptchaError:
                     pass
                 if sol:
-                    return (sol)
+                    return sol
                 jitter = random.uniform(-0.5, 0.5)
                 delay = min(self.poll_max, max(1.0, delay * 1.6 + jitter))
                 yield self._sleep(delay)

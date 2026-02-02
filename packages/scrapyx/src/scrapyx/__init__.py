@@ -9,4 +9,3 @@ for scrapyx-related packages such as:
 """
 
 __version__ = "0.1.0"
-
