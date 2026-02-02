@@ -19,8 +19,8 @@ completion = ["faststream[rabbit,redis]>=0.6.2", "redis>=5.0.4"]
 requires = ["hatchling>=1.21.1"]
 build-backend = "hatchling.build"
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
   "ruff>=0.5",
   "mypy>=1.10",
   "pyright>=1.1",

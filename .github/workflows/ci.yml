@@ -33,11 +33,11 @@ jobs:
 
       - name: Ruff format (scrapyx-core)
         run: |
-          cd packages/scrapyx-core && uv sync && uv run ruff format --check src/
+          cd packages/scrapyx-core && uv sync --group dev && uv run ruff format --check src/
 
       - name: Ruff format (scrapyx-mw)
         run: |
-          cd packages/scrapyx-mw && uv sync --extra dev && uv run ruff format --check src/ tests/
+          cd packages/scrapyx-mw && uv sync --group dev && uv run ruff format --check src/ tests/
 
       - name: Ruff lint (scrapyx-core)
         run: |
@@ -49,11 +49,11 @@ jobs:
 
       - name: Pyright (scrapyx-core)
         run: |
-          cd packages/scrapyx-core && uv sync --extra webhook --extra completion && uv run pyright src/
+          cd packages/scrapyx-core && uv sync --group dev --extra webhook --extra completion && uv run pyright src/
 
       - name: Pyright (scrapyx-mw)
         run: |
-          cd packages/scrapyx-mw && uv sync --extra dev --extra curl-cffi && uv run pyright src/
+          cd packages/scrapyx-mw && uv sync --group dev --extra curl-cffi && uv run pyright src/
 
       - name: Bandit (scrapyx-core)
         run: |
@@ -69,7 +69,7 @@ jobs:
 
       - name: Tests (scrapyx-mw)
         run: |
-          cd packages/scrapyx-mw && uv sync --extra dev && uv run pytest tests/ -v
+          cd packages/scrapyx-mw && uv sync --group dev && uv run pytest tests/ -v
 
       - name: Create venv and install build
         run: |

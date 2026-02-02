@@ -16,7 +16,7 @@ def validate_captcha_settings(settings: Any) -> Iterable[Tuple[str, str]]:
     """
     enabled = bool(settings.getbool("CAPTCHA_ENABLED", False))
     if not enabled:
-        return []
+        return
 
     provider = (settings.get("CAPTCHA_PROVIDER", "") or "").lower()
     api_key = settings.get("CAPTCHA_API_KEY", "") or ""
