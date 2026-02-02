@@ -19,7 +19,7 @@ class TestSessionMiddleware:
         settings = MagicMock()
         settings.getdict.return_value = {"Accept": "application/json"}
         settings.get.return_value = {}
-        
+
         middleware = SessionMiddleware(settings)
         return middleware
 
@@ -27,10 +27,8 @@ class TestSessionMiddleware:
         """Test request processing with session headers."""
         request = Request("http://example.com")
         spider = MagicMock()
-        spider.service_config = {
-            "HEADERS": {"User-Agent": "Custom Agent"}
-        }
-        
+        spider.service_config = {"HEADERS": {"User-Agent": "Custom Agent"}}
+
         result = middleware.process_request(request, spider)
         assert result is None
         assert "User-Agent" in request.headers
@@ -41,7 +39,7 @@ class TestSessionMiddleware:
         request = Request("http://example.com")
         spider = MagicMock()
         spider.service_config = {}
-        
+
         result = middleware.process_request(request, spider)
         assert result is None
 
@@ -54,7 +52,7 @@ class TestApiRequestMiddleware:
         """Create an API request middleware instance."""
         settings = MagicMock()
         settings.get.return_value = {}
-        
+
         middleware = ApiRequestMiddleware(settings)
         return middleware
 
@@ -62,10 +60,8 @@ class TestApiRequestMiddleware:
         """Test request processing with API headers."""
         request = Request("http://example.com")
         spider = MagicMock()
-        spider.service_config = {
-            "API_HEADERS": {"X-API-Key": "secret"}
-        }
-        
+        spider.service_config = {"API_HEADERS": {"X-API-Key": "secret"}}
+
         result = middleware.process_request(request, spider)
         assert result is None
         assert "X-Api-Key" in request.headers
@@ -76,7 +72,7 @@ class TestApiRequestMiddleware:
         request = Request("http://example.com")
         spider = MagicMock()
         spider.service_config = {}
-        
+
         result = middleware.process_request(request, spider)
         assert result is None
 
@@ -88,7 +84,7 @@ class TestDebugRequestMiddleware:
     def middleware(self):
         """Create a debug middleware instance."""
         settings = MagicMock()
-        
+
         middleware = DebugRequestMiddleware(settings)
         return middleware
 
@@ -97,8 +93,7 @@ class TestDebugRequestMiddleware:
         request = Request("http://example.com")
         spider = MagicMock()
         spider.logger = MagicMock()
-        
+
         result = middleware.process_request(request, spider)
         assert result is None
         spider.logger.debug.assert_called_once()
-

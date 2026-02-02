@@ -25,14 +25,16 @@ class TestCaptchaPollingIntegration:
     @pytest.fixture
     def middleware(self, settings):
         """Create captcha middleware instance."""
-        with patch('scrapyx_mw.middlewares.captcha_polling.Agent'):
-            with patch('scrapyx_mw.middlewares.captcha_polling.create_provider') as mock_create:
+        with patch("scrapyx_mw.middlewares.captcha_polling.Agent"):
+            with patch(
+                "scrapyx_mw.middlewares.captcha_polling.create_provider"
+            ) as mock_create:
                 # Mock provider
                 mock_provider = Mock()
                 mock_provider.submit.return_value = "captcha_id_123"
                 mock_provider.poll.return_value = "solution_token"
                 mock_create.return_value = mock_provider
-                
+
                 middleware = AsyncCaptchaMiddleware(settings)
                 middleware.provider = mock_provider
                 return middleware
@@ -44,14 +46,14 @@ class TestCaptchaPollingIntegration:
         spider.name = "test_spider"
         spider.captcha_needed = True
         spider.site_key = "6Le-wvkSAAAAAKB"
-        
+
         # First request should solve captcha
         result1 = middleware.process_request(request, spider)
-        
+
         # Second request should use cache
         request2 = Request("http://example.com")
         result2 = middleware.process_request(request2, spider)
-        
+
         # Both should succeed
         assert result1 is None or request1.meta.get("recaptcha_solution")
         assert result2 is None or request2.meta.get("recaptcha_solution")
@@ -64,11 +66,11 @@ class TestCaptchaPollingIntegration:
         spider.name = "test_spider"
         spider.captcha_needed = True
         spider.site_key = "6Le-wvkSAAAAAKB"
-        
+
         # Both requests should share the same captcha solution
         result1 = middleware.process_request(request1, spider)
         result2 = middleware.process_request(request2, spider)
-        
+
         # Solutions should be identical
         assert result1 is None or request1.meta.get("recaptcha_solution")
         assert result2 is None or request2.meta.get("recaptcha_solution")
@@ -77,7 +79,7 @@ class TestCaptchaPollingIntegration:
         """Test that middleware is disabled when CAPTCHA_ENABLED=False."""
         settings = Mock()
         settings.getbool.return_value = False
-        
+
         with pytest.raises(Exception):  # Should raise NotConfigured
             AsyncCaptchaMiddleware(settings)
 
@@ -86,7 +88,7 @@ class TestCaptchaPollingIntegration:
         settings = Mock()
         settings.getbool.return_value = True
         settings.get.return_value = None  # No API key
-        
+
         with pytest.raises(Exception):  # Should raise NotConfigured
             AsyncCaptchaMiddleware(settings)
 
@@ -98,13 +100,12 @@ class TestCaptchaWebhookIntegration:
     def test_webhook_middleware_initialization(self):
         """Test webhook middleware initialization."""
         from scrapyx_mw.middlewares.captcha_webhook import WebhookCaptchaMiddleware
-        
+
         settings = Mock()
         settings.getbool.return_value = True
         settings.get.return_value = "test_api_key"
-        
-        with patch('scrapyx_mw.middlewares.captcha_webhook.Agent'):
-            with patch('scrapyx_mw.middlewares.captcha_webhook.create_provider'):
+
+        with patch("scrapyx_mw.middlewares.captcha_webhook.Agent"):
+            with patch("scrapyx_mw.middlewares.captcha_webhook.create_provider"):
                 middleware = WebhookCaptchaMiddleware(settings)
                 assert middleware.api_key == "test_api_key"
-

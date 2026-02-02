@@ -2,13 +2,17 @@ from __future__ import annotations
 from typing import Dict, Any
 from .config import ScrapyXConfig
 
+
 def default_config(**overrides: Any) -> ScrapyXConfig:
     cfg = ScrapyXConfig()
     for k, v in overrides.items():
         setattr(cfg, k, v)
     return cfg
 
-def apply_downloader_middlewares(settings: Dict[str, Any], cfg: ScrapyXConfig) -> Dict[str, int]:
+
+def apply_downloader_middlewares(
+    settings: Dict[str, Any], cfg: ScrapyXConfig
+) -> Dict[str, int]:
     """
     Build the DOWNLOADER_MIDDLEWARES dict at settings import time.
     Also mirrors cfg values into Scrapy settings names for compatibility.
@@ -23,9 +27,13 @@ def apply_downloader_middlewares(settings: Dict[str, Any], cfg: ScrapyXConfig) -
         mw["scrapyx_mw.middlewares.debug.DebugRequestMiddleware"] = cfg.prio_debug
 
     if cfg.captcha == "polling" and cfg.captcha_enabled:
-        mw["scrapyx_mw.middlewares.captcha_polling.AsyncCaptchaMiddleware"] = cfg.prio_captcha_poll
+        mw["scrapyx_mw.middlewares.captcha_polling.AsyncCaptchaMiddleware"] = (
+            cfg.prio_captcha_poll
+        )
     elif cfg.captcha == "webhook" and cfg.captcha_enabled:
-        mw["scrapyx_mw.middlewares.captcha_webhook.WebhookCaptchaMiddleware"] = cfg.prio_captcha_webhook
+        mw["scrapyx_mw.middlewares.captcha_webhook.WebhookCaptchaMiddleware"] = (
+            cfg.prio_captcha_webhook
+        )
 
     if cfg.curl_cffi:
         mw["scrapyx_mw.middlewares.curl_cffi.CurlCffiMiddleware"] = cfg.prio_curl_cffi
@@ -48,7 +56,10 @@ def apply_downloader_middlewares(settings: Dict[str, Any], cfg: ScrapyXConfig) -
 
     return mw
 
-def apply_spider_middlewares(settings: Dict[str, Any], cfg: ScrapyXConfig) -> Dict[str, int]:
+
+def apply_spider_middlewares(
+    settings: Dict[str, Any], cfg: ScrapyXConfig
+) -> Dict[str, int]:
     mw: Dict[str, int] = {}
     # No spider middlewares currently
     return mw

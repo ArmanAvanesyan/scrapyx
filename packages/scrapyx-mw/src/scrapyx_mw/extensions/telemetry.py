@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class TelemetryExtension:
     """
     Extension for tracking captcha solving metrics.
-    
+
     Tracks:
     - Solve attempts, successes, failures
     - Solve times
@@ -24,7 +24,7 @@ class TelemetryExtension:
     def __init__(self, crawler: Crawler) -> None:
         if not crawler.settings.getbool("SCRAPYX_TELEMETRY_ENABLED", False):
             raise NotConfigured("Telemetry extension not enabled")
-        
+
         self.stats = crawler.stats
         self.solve_attempts = 0
         self.solve_successes = 0
@@ -50,7 +50,7 @@ class TelemetryExtension:
         if total > 0:
             success_rate = (self.solve_successes / total) * 100
             avg_time = self.total_solve_time / total if total > 0 else 0
-            
+
             logger.info(
                 f"Captcha Telemetry Summary:\n"
                 f"  Attempts: {total}\n"
@@ -59,7 +59,7 @@ class TelemetryExtension:
                 f"  Avg Solve Time: {avg_time:.2f}s\n"
                 f"  Total Time: {self.total_solve_time:.2f}s"
             )
-            
+
             # Emit to stats
             self.stats.set_value("captcha/attempts", total)
             self.stats.set_value("captcha/successes", self.solve_successes)
@@ -90,4 +90,3 @@ class TelemetryExtension:
             self.solve_start_times.pop(captcha_id)
         self.stats.inc_value("captcha/failures")
         self.stats.inc_value(f"captcha/failures/{error}", 1)
-

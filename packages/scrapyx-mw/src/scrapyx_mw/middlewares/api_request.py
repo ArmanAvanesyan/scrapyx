@@ -1,8 +1,10 @@
 from typing import Any
 from scrapy import signals
 
+
 class ApiRequestMiddleware:
     """Injects API-specific headers from spider.service_config['HEADERS']."""
+
     @classmethod
     def from_crawler(cls, crawler: Any) -> "ApiRequestMiddleware":
         m = cls()

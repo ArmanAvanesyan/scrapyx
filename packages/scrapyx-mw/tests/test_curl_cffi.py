@@ -22,7 +22,9 @@ class TestCurlCffiDownloadHandler:
 
         settings = MagicMock()
         settings.getbool.return_value = True
-        with patch.object(HTTP11DownloadHandler, "__init__", lambda self, s, c=None: None):
+        with patch.object(
+            HTTP11DownloadHandler, "__init__", lambda self, s, c=None: None
+        ):
             handler = CurlCffiDownloadHandler(settings)
         assert handler.curl_cffi_enabled is True
         settings.getbool.assert_called_with("CURL_CFFI_ENABLED", False)
@@ -33,7 +35,9 @@ class TestCurlCffiDownloadHandler:
 
         settings = MagicMock()
         settings.getbool.return_value = False
-        with patch.object(HTTP11DownloadHandler, "__init__", lambda self, s, c=None: None):
+        with patch.object(
+            HTTP11DownloadHandler, "__init__", lambda self, s, c=None: None
+        ):
             handler = CurlCffiDownloadHandler(settings)
         assert handler.curl_cffi_enabled is False
 

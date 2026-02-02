@@ -15,6 +15,7 @@ Usage:
     request.meta['use_curl_cffi'] = True
     request.meta['curl_cffi_impersonate'] = 'chrome110'  # Optional
 """
+
 import logging
 
 from scrapy import Request
@@ -25,6 +26,7 @@ from twisted.internet.threads import deferToThread
 
 try:
     from curl_cffi import requests as curl_requests
+
     CURL_CFFI_AVAILABLE = True
 except ImportError:
     CURL_CFFI_AVAILABLE = False
@@ -43,7 +45,7 @@ class CurlCffiDownloadHandler(HTTP11DownloadHandler):
     def __init__(self, settings, crawler=None):
         """Initialize handler."""
         super().__init__(settings, crawler)
-        self.curl_cffi_enabled = settings.getbool('CURL_CFFI_ENABLED', False)
+        self.curl_cffi_enabled = settings.getbool("CURL_CFFI_ENABLED", False)
 
         if not CURL_CFFI_AVAILABLE:
             logger.warning(
@@ -63,9 +65,8 @@ class CurlCffiDownloadHandler(HTTP11DownloadHandler):
             Deferred that fires with Response
         """
         # Check if curl_cffi should be used for this request
-        use_curl_cffi = (
-            self.curl_cffi_enabled or
-            request.meta.get('use_curl_cffi', False)
+        use_curl_cffi = self.curl_cffi_enabled or request.meta.get(
+            "use_curl_cffi", False
         )
 
         if use_curl_cffi and CURL_CFFI_AVAILABLE:
@@ -100,47 +101,45 @@ class CurlCffiDownloadHandler(HTTP11DownloadHandler):
             Scrapy Response object
         """
         # Get impersonation target from meta or default
-        impersonate = request.meta.get('curl_cffi_impersonate', 'chrome110')
+        impersonate = request.meta.get("curl_cffi_impersonate", "chrome110")
 
         # Prepare request kwargs
         kwargs = {
-            'timeout': request.meta.get('download_timeout', 180),
-            'allow_redirects': True,
+            "timeout": request.meta.get("download_timeout", 180),
+            "allow_redirects": True,
         }
 
         # Set headers
         headers = {}
         if request.headers:
             # Convert Scrapy headers to dict
-            if hasattr(request.headers, 'to_unicode_dict'):
+            if hasattr(request.headers, "to_unicode_dict"):
                 headers = request.headers.to_unicode_dict()
             else:
                 headers = dict(request.headers)
-        kwargs['headers'] = headers
+        kwargs["headers"] = headers
 
         # Set cookies
         if request.cookies:
-            kwargs['cookies'] = dict(request.cookies)
+            kwargs["cookies"] = dict(request.cookies)
 
         # Set method and data
         method = request.method.upper()
-        if method == 'GET':
+        if method == "GET":
             # GET requests - params are in URL already
             pass
-        elif method == 'POST':
+        elif method == "POST":
             from scrapy import FormRequest
+
             if isinstance(request, FormRequest):
-                kwargs['data'] = request.formdata
+                kwargs["data"] = request.formdata
             else:
-                kwargs['data'] = request.body
+                kwargs["data"] = request.body
 
         try:
             # Make request with curl_cffi
             curl_response = curl_requests.request(
-                method,
-                request.url,
-                impersonate=impersonate,
-                **kwargs
+                method, request.url, impersonate=impersonate, **kwargs
             )
 
             # Convert curl_cffi response to Scrapy Response
@@ -152,10 +151,11 @@ class CurlCffiDownloadHandler(HTTP11DownloadHandler):
             logger.error(f"curl_cffi request failed for {request.url}: {e}")
             # Return error response
             from scrapy.http import TextResponse
+
             return TextResponse(
                 url=request.url,
                 status=500,
-                body=str(e).encode('utf-8'),
+                body=str(e).encode("utf-8"),
                 request=request,
             )
 
@@ -177,9 +177,9 @@ class CurlCffiDownloadHandler(HTTP11DownloadHandler):
         from scrapy.http import TextResponse, HtmlResponse
 
         # Determine response class based on content type
-        content_type = curl_response.headers.get('content-type', '').lower()
+        content_type = curl_response.headers.get("content-type", "").lower()
 
-        if 'text/html' in content_type:
+        if "text/html" in content_type:
             response_class = HtmlResponse
         else:
             response_class = TextResponse
@@ -187,13 +187,13 @@ class CurlCffiDownloadHandler(HTTP11DownloadHandler):
         # Convert headers
         headers = {}
         for key, value in curl_response.headers.items():
-            headers[key.encode('utf-8')] = value.encode('utf-8')
+            headers[key.encode("utf-8")] = value.encode("utf-8")
 
         return response_class(
             url=str(curl_response.url),
             status=curl_response.status_code,
             headers=headers,
             body=curl_response.content,
-            encoding=curl_response.encoding or 'utf-8',
+            encoding=curl_response.encoding or "utf-8",
             request=request,
         )

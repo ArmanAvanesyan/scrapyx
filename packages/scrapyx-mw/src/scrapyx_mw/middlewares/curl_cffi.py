@@ -16,6 +16,7 @@ Usage:
     To customize impersonation target:
     request.meta['curl_cffi_impersonate'] = 'chrome110'  # Optional, default is chrome110
 """
+
 import logging
 from typing import Any
 
@@ -24,6 +25,7 @@ from scrapy.http import HtmlResponse, Response, TextResponse
 
 try:
     from curl_cffi import requests as curl_requests
+
     CURL_CFFI_AVAILABLE = True
 except ImportError:
     CURL_CFFI_AVAILABLE = False
@@ -66,50 +68,48 @@ class CurlCffiMiddleware:
         """
         # Check if curl_cffi should be disabled for this request
         # Default is True (use curl_cffi), unless explicitly disabled
-        use_curl_cffi = request.meta.get('use_curl_cffi', True)
+        use_curl_cffi = request.meta.get("use_curl_cffi", True)
 
         if not use_curl_cffi or not CURL_CFFI_AVAILABLE:
             return None  # Continue with default handler
 
         # Get impersonation target from meta or default
-        impersonate = request.meta.get('curl_cffi_impersonate', 'chrome110')
+        impersonate = request.meta.get("curl_cffi_impersonate", "chrome110")
 
         # Prepare request kwargs
         kwargs = {
-            'timeout': request.meta.get('download_timeout', 180),
-            'allow_redirects': True,
+            "timeout": request.meta.get("download_timeout", 180),
+            "allow_redirects": True,
         }
 
         # Set headers
         headers = {}
         if request.headers:
             # Convert Scrapy headers to dict
-            if hasattr(request.headers, 'to_unicode_dict'):
+            if hasattr(request.headers, "to_unicode_dict"):
                 headers = request.headers.to_unicode_dict()
             else:
                 headers = dict(request.headers)
-        kwargs['headers'] = headers
+        kwargs["headers"] = headers
 
         # Set cookies
         if request.cookies:
-            kwargs['cookies'] = dict(request.cookies)
+            kwargs["cookies"] = dict(request.cookies)
 
         # Set method and data
         method = request.method.upper()
-        if method == 'POST':
+        if method == "POST":
             from scrapy import FormRequest
+
             if isinstance(request, FormRequest):
-                kwargs['data'] = request.formdata
+                kwargs["data"] = request.formdata
             else:
-                kwargs['data'] = request.body
+                kwargs["data"] = request.body
 
         try:
             # Make request with curl_cffi
             curl_response = curl_requests.request(
-                method,
-                request.url,
-                impersonate=impersonate,
-                **kwargs
+                method, request.url, impersonate=impersonate, **kwargs
             )
 
             # Convert curl_cffi response to Scrapy Response
@@ -123,7 +123,7 @@ class CurlCffiMiddleware:
             return TextResponse(
                 url=request.url,
                 status=500,
-                body=str(e).encode('utf-8'),
+                body=str(e).encode("utf-8"),
                 request=request,
             )
 
@@ -143,9 +143,9 @@ class CurlCffiMiddleware:
             Scrapy Response object
         """
         # Determine response class based on content type
-        content_type = curl_response.headers.get('content-type', '').lower()
+        content_type = curl_response.headers.get("content-type", "").lower()
 
-        if 'text/html' in content_type:
+        if "text/html" in content_type:
             response_class = HtmlResponse
         else:
             response_class = TextResponse
@@ -153,13 +153,13 @@ class CurlCffiMiddleware:
         # Convert headers
         headers = {}
         for key, value in curl_response.headers.items():
-            headers[key.encode('utf-8')] = value.encode('utf-8')
+            headers[key.encode("utf-8")] = value.encode("utf-8")
 
         return response_class(
             url=str(curl_response.url),
             status=curl_response.status_code,
             headers=headers,
             body=curl_response.content,
-            encoding=curl_response.encoding or 'utf-8',
+            encoding=curl_response.encoding or "utf-8",
             request=request,
         )

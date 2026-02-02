@@ -4,6 +4,7 @@ from typing import Literal, Optional, Dict, Any
 
 CaptchaStrategy = Literal["none", "polling", "webhook"]
 
+
 @dataclass
 class ScrapyXConfig:
     api_request: bool = True

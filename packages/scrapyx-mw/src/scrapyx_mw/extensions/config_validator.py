@@ -63,4 +63,3 @@ class ConfigValidator:
                     )
 
         logger.info("[ConfigValidator] CAPTCHA configuration validated successfully.")
-

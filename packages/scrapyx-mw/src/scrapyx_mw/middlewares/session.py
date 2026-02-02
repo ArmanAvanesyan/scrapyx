@@ -1,8 +1,10 @@
 from typing import Any
 from scrapy import signals
 
+
 class SessionMiddleware:
     """Applies default session headers from settings.SESSION_HEADERS or service_config['HEADERS']."""
+
     def __init__(self, settings: Any) -> None:
         self.session_headers = settings.get("SESSION_HEADERS", {})
 

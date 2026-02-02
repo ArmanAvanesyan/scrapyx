@@ -7,9 +7,15 @@ from twisted.web.client import Agent, HTTPConnectionPool
 from scrapy import signals
 from scrapy.exceptions import NotConfigured
 
-from ..providers import create_provider, CaptchaError, PermanentCaptchaError, TransientCaptchaError
+from ..providers import (
+    create_provider,
+    CaptchaError,
+    PermanentCaptchaError,
+    TransientCaptchaError,
+)
 
 HTTP_OK = 200
+
 
 class AsyncCaptchaMiddleware:
     """
@@ -21,6 +27,7 @@ class AsyncCaptchaMiddleware:
     - Support for 2captcha and CapSolver providers
     Compatible with your compliance_scraper settings & spider flags.
     """
+
     def __init__(self, settings: Any) -> None:
         if not settings.getbool("CAPTCHA_ENABLED", False):
             raise NotConfigured("CAPTCHA not enabled")
@@ -36,7 +43,7 @@ class AsyncCaptchaMiddleware:
         self.http_timeout = float(settings.getfloat("CAPTCHA_HTTP_TIMEOUT_S", 15.0))
         self.http_retries = int(settings.getint("CAPTCHA_HTTP_RETRIES", 2))
 
-        self.cache = {}   # key -> (token, expires)
+        self.cache = {}  # key -> (token, expires)
         self.inflight = {}
         pool = HTTPConnectionPool(reactor, persistent=True)
         self.agent = Agent(reactor, pool=pool)
@@ -44,14 +51,24 @@ class AsyncCaptchaMiddleware:
         # Create provider based on settings
         provider_name = settings.get("CAPTCHA_PROVIDER", "2captcha")
         provider_settings = {
-            "CAPTCHA_2CAPTCHA_BASE": settings.get("CAPTCHA_2CAPTCHA_BASE", "https://2captcha.com"),
-            "CAPTCHA_2CAPTCHA_METHOD": settings.get("CAPTCHA_2CAPTCHA_METHOD", "userrecaptcha"),
-            "CAPTCHA_CAPSOLVER_BASE": settings.get("CAPTCHA_CAPSOLVER_BASE", "https://api.capsolver.com"),
-            "CAPTCHA_CAPSOLVER_TASK_TYPE": settings.get("CAPTCHA_CAPSOLVER_TASK_TYPE", "ReCaptchaV2TaskProxyLess"),
+            "CAPTCHA_2CAPTCHA_BASE": settings.get(
+                "CAPTCHA_2CAPTCHA_BASE", "https://2captcha.com"
+            ),
+            "CAPTCHA_2CAPTCHA_METHOD": settings.get(
+                "CAPTCHA_2CAPTCHA_METHOD", "userrecaptcha"
+            ),
+            "CAPTCHA_CAPSOLVER_BASE": settings.get(
+                "CAPTCHA_CAPSOLVER_BASE", "https://api.capsolver.com"
+            ),
+            "CAPTCHA_CAPSOLVER_TASK_TYPE": settings.get(
+                "CAPTCHA_CAPSOLVER_TASK_TYPE", "ReCaptchaV2TaskProxyLess"
+            ),
             "CAPTCHA_HTTP_TIMEOUT_S": self.http_timeout,
             "CAPTCHA_HTTP_RETRIES": self.http_retries,
         }
-        self.provider = create_provider(provider_name, self.api_key, self.agent, provider_settings)
+        self.provider = create_provider(
+            provider_name, self.api_key, self.agent, provider_settings
+        )
 
     @classmethod
     def from_crawler(cls, crawler: Any):
@@ -59,8 +76,10 @@ class AsyncCaptchaMiddleware:
         crawler.signals.connect(m.spider_opened, signal=signals.spider_opened)
         return m
 
-    def spider_opened(self, spider): 
-        spider.logger.info(f"AsyncCaptchaMiddleware (polling) active with provider: {self.provider.__class__.__name__}")
+    def spider_opened(self, spider):
+        spider.logger.info(
+            f"AsyncCaptchaMiddleware (polling) active with provider: {self.provider.__class__.__name__}"
+        )
 
     def _sleep(self, s: float):
         d = defer.Deferred()
@@ -69,6 +88,7 @@ class AsyncCaptchaMiddleware:
 
     def _origin(self, url: str):
         from urllib.parse import urlparse
+
         p = urlparse(url)
         return f"{p.scheme}://{p.netloc}"
 
@@ -119,11 +139,11 @@ class AsyncCaptchaMiddleware:
         try:
             # Check if this is invisible reCAPTCHA from service config
             is_invisible = False
-            service_config = getattr(spider, 'service_config', {})
-            if service_config and service_config.get('RECAPTCHA_INVISIBLE'):
+            service_config = getattr(spider, "service_config", {})
+            if service_config and service_config.get("RECAPTCHA_INVISIBLE"):
                 is_invisible = True
                 spider.logger.debug(f"Using invisible reCAPTCHA mode for {spider.name}")
-            
+
             cid = yield self.provider.submit(site_key, url, is_invisible=is_invisible)
             start = time.time()
             delay = self.poll_initial

@@ -13,6 +13,7 @@ from twisted.web.http_headers import Headers
 
 class CaptchaError(Exception):
     """Base captcha error."""
+
     permanent: bool = False
 
 
@@ -63,7 +64,9 @@ class CaptchaProvider:
                 if attempt > self.http_retries:
                     raise TransientCaptchaError(f"Transport failure: {e}")
                 yield self._sleep(0.75 * attempt)
-        raise TransientCaptchaError(str(last_err) if last_err else "Unknown transport error")
+        raise TransientCaptchaError(
+            str(last_err) if last_err else "Unknown transport error"
+        )
 
     @defer.inlineCallbacks
     def _post_json(self, url: str, payload: dict) -> dict:
@@ -76,9 +79,10 @@ class CaptchaProvider:
                 body_producer = FileBodyProducer(BytesIO(json_data))
                 headers = Headers({b"Content-Type": [b"application/json"]})
                 d = self.agent.request(
-                    b"POST", url.encode("utf-8"),
+                    b"POST",
+                    url.encode("utf-8"),
                     headers=headers,
-                    bodyProducer=body_producer
+                    bodyProducer=body_producer,
                 )
                 d.addTimeout(self.request_timeout_s, reactor)
                 resp = yield d
@@ -102,7 +106,9 @@ class CaptchaProvider:
                 if attempt > self.http_retries:
                     raise TransientCaptchaError(f"Transport failure: {e}")
                 yield self._sleep(0.75 * attempt)
-        raise TransientCaptchaError(str(last_err) if last_err else "Unknown transport error")
+        raise TransientCaptchaError(
+            str(last_err) if last_err else "Unknown transport error"
+        )
 
     def _sleep(self, s: float):
         d = defer.Deferred()

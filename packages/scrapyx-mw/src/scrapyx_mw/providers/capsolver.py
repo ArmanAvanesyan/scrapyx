@@ -24,8 +24,14 @@ class CapSolverProvider(CaptchaProvider):
     Failures have errorId != 0 with errorCode/errorDescription.
     """
 
-    def __init__(self, api_key: str, agent: Agent, base_url: str = "https://api.capsolver.com",
-                 task_type: str = "ReCaptchaV2TaskProxyLess", **kwargs):
+    def __init__(
+        self,
+        api_key: str,
+        agent: Agent,
+        base_url: str = "https://api.capsolver.com",
+        task_type: str = "ReCaptchaV2TaskProxyLess",
+        **kwargs,
+    ):
         super().__init__(api_key, agent, **kwargs)
         self.base_url = base_url
         self.task_type = task_type
@@ -38,13 +44,13 @@ class CapSolverProvider(CaptchaProvider):
                 "type": self.task_type,
                 "websiteURL": page_url,
                 "websiteKey": site_key,
-            }
+            },
         }
-        
+
         # Add isInvisible parameter for invisible reCAPTCHA
         if is_invisible:
             payload["task"]["isInvisible"] = True
-        
+
         url = f"{self.base_url}/createTask"
         data = yield self._post_json(url, payload)
 
@@ -57,14 +63,22 @@ class CapSolverProvider(CaptchaProvider):
         desc = data.get("errorDescription", "")
         # Common permanent-ish errors
         permanent_codes = {
-            "ERROR_TOKEN_EXPIRED", "ERROR_UNSUPPORTED_TASK_TYPE", "ERROR_KEY_DENIED",
-            "ERROR_INCORRECT_SESSION_DATA", "ERROR_BAD_PARAMETERS", "ERROR_ZERO_BALANCE",
+            "ERROR_TOKEN_EXPIRED",
+            "ERROR_UNSUPPORTED_TASK_TYPE",
+            "ERROR_KEY_DENIED",
+            "ERROR_INCORRECT_SESSION_DATA",
+            "ERROR_BAD_PARAMETERS",
+            "ERROR_ZERO_BALANCE",
             "ERROR_TOO_MANY_BAD_REQUESTS",
         }
         if code in permanent_codes:
-            raise PermanentCaptchaError(f"CapSolver createTask error: {code} {desc}".strip())
+            raise PermanentCaptchaError(
+                f"CapSolver createTask error: {code} {desc}".strip()
+            )
 
-        raise TransientCaptchaError(f"CapSolver createTask error: {code or desc or 'Unknown error'}")
+        raise TransientCaptchaError(
+            f"CapSolver createTask error: {code or desc or 'Unknown error'}"
+        )
 
     @defer.inlineCallbacks
     def poll(self, captcha_id: str) -> Optional[str]:
@@ -77,12 +91,19 @@ class CapSolverProvider(CaptchaProvider):
             code = data.get("errorCode", "")
             desc = data.get("errorDescription", "")
             permanent_codes = {
-                "ERROR_TOKEN_EXPIRED", "ERROR_KEY_DENIED", "ERROR_INCORRECT_SESSION_DATA",
-                "ERROR_BAD_PARAMETERS", "ERROR_ZERO_BALANCE",
+                "ERROR_TOKEN_EXPIRED",
+                "ERROR_KEY_DENIED",
+                "ERROR_INCORRECT_SESSION_DATA",
+                "ERROR_BAD_PARAMETERS",
+                "ERROR_ZERO_BALANCE",
             }
             if code in permanent_codes:
-                raise PermanentCaptchaError(f"CapSolver getTaskResult error: {code} {desc}".strip())
-            raise TransientCaptchaError(f"CapSolver getTaskResult error: {code or desc or 'Unknown error'}")
+                raise PermanentCaptchaError(
+                    f"CapSolver getTaskResult error: {code} {desc}".strip()
+                )
+            raise TransientCaptchaError(
+                f"CapSolver getTaskResult error: {code or desc or 'Unknown error'}"
+            )
 
         status = data.get("status")
         if status == "processing":
@@ -93,7 +114,9 @@ class CapSolverProvider(CaptchaProvider):
             if solution:
                 return solution
             # If ready but missing field, treat as transient data hiccup
-            raise TransientCaptchaError("CapSolver ready but missing gRecaptchaResponse")
+            raise TransientCaptchaError(
+                "CapSolver ready but missing gRecaptchaResponse"
+            )
 
         # Unknown status → transient
         raise TransientCaptchaError(f"CapSolver unexpected status: {status}")

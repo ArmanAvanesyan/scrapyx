@@ -17,8 +17,14 @@ HTTP_OK = 200
 class TwoCaptchaProvider(CaptchaProvider):
     """2captcha.com provider implementation."""
 
-    def __init__(self, api_key: str, agent: Agent, base_url: str = "https://2captcha.com", 
-                 method: str = "userrecaptcha", **kwargs):
+    def __init__(
+        self,
+        api_key: str,
+        agent: Agent,
+        base_url: str = "https://2captcha.com",
+        method: str = "userrecaptcha",
+        **kwargs,
+    ):
         super().__init__(api_key, agent, **kwargs)
         self.base_url = base_url
         self.method = method
@@ -31,19 +37,24 @@ class TwoCaptchaProvider(CaptchaProvider):
             "method": self.method,
             "googlekey": site_key,
             "pageurl": page_url,
-            "json": 1
+            "json": 1,
         }
         url = f"{self.base_url}/in.php?{urlencode(params)}"
         data = yield self._get_json(url)
-        
+
         if data.get("status") == 1:
             return data["request"]
-        
+
         req = data.get("request")
         permanent = {
-            "ERROR_WRONG_USER_KEY", "ERROR_ZERO_BALANCE", "ERROR_PAGEURL", 
-            "ERROR_GOOGLEKEY", "ERROR_IP_NOT_ALLOWED", "ERROR_BAD_PARAMETERS",
-            "ERROR_DUPLICATE", "ERROR_DOMAIN_NOT_ALLOWED"
+            "ERROR_WRONG_USER_KEY",
+            "ERROR_ZERO_BALANCE",
+            "ERROR_PAGEURL",
+            "ERROR_GOOGLEKEY",
+            "ERROR_IP_NOT_ALLOWED",
+            "ERROR_BAD_PARAMETERS",
+            "ERROR_DUPLICATE",
+            "ERROR_DOMAIN_NOT_ALLOWED",
         }
         if req in permanent:
             raise PermanentCaptchaError(f"2Captcha submit error: {req}")
@@ -51,25 +62,23 @@ class TwoCaptchaProvider(CaptchaProvider):
 
     @defer.inlineCallbacks
     def poll(self, captcha_id: str) -> Optional[str]:
-        params = {
-            "key": self.api_key,
-            "action": "get",
-            "id": captcha_id,
-            "json": 1
-        }
+        params = {"key": self.api_key, "action": "get", "id": captcha_id, "json": 1}
         url = f"{self.base_url}/res.php?{urlencode(params)}"
         data = yield self._get_json(url)
-        
+
         if data.get("status") == 1:
             return data["request"]
-        
+
         req = data.get("request")
         if req == "CAPCHA_NOT_READY":
             return None
-        
+
         permanent = {
-            "ERROR_WRONG_USER_KEY", "ERROR_WRONG_CAPTCHA_ID", "ERROR_CAPTCHA_UNSOLVABLE",
-            "ERROR_ZERO_BALANCE", "ERROR_IP_NOT_ALLOWED"
+            "ERROR_WRONG_USER_KEY",
+            "ERROR_WRONG_CAPTCHA_ID",
+            "ERROR_CAPTCHA_UNSOLVABLE",
+            "ERROR_ZERO_BALANCE",
+            "ERROR_IP_NOT_ALLOWED",
         }
         if req in permanent:
             raise PermanentCaptchaError(f"2Captcha poll error: {req}")
