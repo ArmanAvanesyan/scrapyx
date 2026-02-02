@@ -2,7 +2,6 @@
 
 import pytest
 from unittest.mock import MagicMock, patch
-from twisted.internet import defer, reactor
 from twisted.web.client import Agent
 import pytest_twisted
 
@@ -10,9 +9,7 @@ from scrapyx_mw.providers import (
     TwoCaptchaProvider,
     CapSolverProvider,
     create_provider,
-    CaptchaError,
     PermanentCaptchaError,
-    TransientCaptchaError,
 )
 
 

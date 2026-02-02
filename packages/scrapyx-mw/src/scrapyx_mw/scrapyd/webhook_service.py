@@ -6,7 +6,12 @@
 Stores solutions in /var/lib/scrapyd/webhook_solutions.db (compatible with your existing project).
 """
 
-import json, logging, os, sqlite3, threading, time
+import json
+import logging
+import os
+import sqlite3
+import threading
+import time
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse

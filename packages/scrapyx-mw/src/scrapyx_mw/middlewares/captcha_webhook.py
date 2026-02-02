@@ -19,8 +19,6 @@ from scrapy.exceptions import IgnoreRequest, NotConfigured
 from ..providers import (
     create_provider,
     CaptchaError,
-    PermanentCaptchaError,
-    TransientCaptchaError,
 )
 
 logger = logging.getLogger(__name__)

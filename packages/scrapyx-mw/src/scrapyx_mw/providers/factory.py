@@ -2,7 +2,6 @@
 Factory for creating captcha providers.
 """
 
-from typing import Any
 from twisted.web.client import Agent
 
 from .base import CaptchaProvider

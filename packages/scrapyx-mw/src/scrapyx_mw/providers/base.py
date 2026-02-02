@@ -5,7 +5,7 @@ Base provider abstraction for scrapyx-mw captcha solving.
 from __future__ import annotations
 import json
 from io import BytesIO
-from typing import Any, Optional
+from typing import Optional
 from twisted.internet import defer, reactor
 from twisted.web.client import Agent, readBody, FileBodyProducer
 from twisted.web.http_headers import Headers

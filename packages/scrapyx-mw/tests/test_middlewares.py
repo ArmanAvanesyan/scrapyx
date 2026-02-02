@@ -1,9 +1,8 @@
 """Unit tests for scrapyx-mw middlewares."""
 
 import pytest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock
 from scrapy import Request
-from scrapy.http import HtmlResponse
 
 from scrapyx_mw.middlewares.session import SessionMiddleware
 from scrapyx_mw.middlewares.api_request import ApiRequestMiddleware

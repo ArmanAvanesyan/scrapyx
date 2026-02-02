@@ -28,7 +28,6 @@ Notes:
 
 from __future__ import annotations
 from typing import Any, Dict
-from scrapy.exceptions import NotConfigured
 
 
 class ScrapyxAddon:
@@ -43,10 +42,14 @@ class ScrapyxAddon:
         """
 
         # Helper getters with defaults
-        getbool = lambda k, d: settings.getbool(k, d)
-        getstr = lambda k, d: settings.get(k, d)
-        getint = lambda k, d: int(settings.getint(k, d))
-        getflt = lambda k, d: float(settings.getfloat(k, d))
+        def getbool(k, d):
+            return settings.getbool(k, d)
+        def getstr(k, d):
+            return settings.get(k, d)
+        def getint(k, d):
+            return int(settings.getint(k, d))
+        def getflt(k, d):
+            return float(settings.getfloat(k, d))
 
         # Feature flags (users can override in their project settings)
         session_on = getbool("SCRAPYX_SESSION_ENABLED", True)

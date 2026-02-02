@@ -1,9 +1,8 @@
 """Integration tests for captcha solving."""
 
 import pytest
-from unittest.mock import MagicMock, Mock
-from scrapy import Request, Spider
-from scrapy.http import HtmlResponse
+from unittest.mock import Mock, patch
+from scrapy import Request
 
 from scrapyx_mw.middlewares.captcha_polling import AsyncCaptchaMiddleware
 
@@ -55,7 +54,7 @@ class TestCaptchaPollingIntegration:
         result2 = middleware.process_request(request2, spider)
 
         # Both should succeed
-        assert result1 is None or request1.meta.get("recaptcha_solution")
+        assert result1 is None or request.meta.get("recaptcha_solution")
         assert result2 is None or request2.meta.get("recaptcha_solution")
 
     def test_captcha_deduplication(self, middleware):

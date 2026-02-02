@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Literal, Optional, Dict, Any
+from typing import Literal, Optional, Dict
 
 CaptchaStrategy = Literal["none", "polling", "webhook"]
 

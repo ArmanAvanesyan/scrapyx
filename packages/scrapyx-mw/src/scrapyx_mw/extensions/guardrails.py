@@ -3,7 +3,7 @@
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
-from typing import Dict, Any
+from typing import Any
 from scrapy import signals
 from scrapy.crawler import Crawler
 from scrapy.exceptions import NotConfigured, CloseSpider
@@ -73,8 +73,6 @@ class GuardrailsExtension:
 
     def engine_stopped(self, reason: str) -> None:
         """Check guardrails on engine stop."""
-        now = datetime.now()
-
         # Check rate limits
         if self.max_per_hour > 0:
             hour_requests = sum(

@@ -11,11 +11,11 @@ This middleware provides intelligent retry logic with:
 
 import random
 import time
-from typing import Dict, List, Optional, Set, Any
+from typing import Optional
 from urllib.parse import urlparse
 
 from scrapy import Request, Spider
-from scrapy.exceptions import NotConfigured, IgnoreRequest
+from scrapy.exceptions import NotConfigured
 from scrapy.http import Response
 
 

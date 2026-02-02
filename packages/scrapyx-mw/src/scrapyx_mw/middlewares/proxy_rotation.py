@@ -11,7 +11,7 @@ This middleware provides intelligent proxy rotation with support for:
 
 import random
 import time
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, List, Optional, Set
 from urllib.parse import urlparse
 
 from scrapy import Request, Spider
