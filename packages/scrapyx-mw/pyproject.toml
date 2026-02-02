@@ -1,36 +1,33 @@
 [project]
 name = "scrapyx-mw"
-version = "0.1.1"
+version = "0.2.0"
 description = "Composable Scrapy middlewares: API/session headers, debug, captcha polling/webhook, proxy rotation, smart retry."
 authors = [{ name = "Your Org" }]
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
   "scrapy>=2.11",
-  "itemloaders>=1.1",
-  "python-dotenv>=1.0.1",
   "twisted>=23.10",
 ]
 
 [project.optional-dependencies]
+curl-cffi = ["curl-cffi"]
 dev = [
   "pytest>=8.2",
   "pytest-twisted>=1.14",
   "pytest-asyncio>=0.24",
   "pytest-cov>=5.0",
   "ruff>=0.6.9",
+  "pyright>=1.1",
+  "bandit[toml]>=1.7",
 ]
 
 [build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.21.1"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["scrapyx_mw*"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/scrapyx_mw"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -61,3 +58,11 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.pyright]
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
+
+[tool.bandit]
+exclude_dirs = []
+skips = ["B101"]

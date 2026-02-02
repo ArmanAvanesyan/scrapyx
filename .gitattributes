@@ -1,0 +1,23 @@
+# Normalize line endings to LF
+* text=auto eol=lf
+
+# Python
+*.py text diff=python
+
+# Config and docs
+*.toml text
+*.yaml text
+*.yml text
+*.md text
+*.json text
+
+# Binaries
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.whl binary
+
+# Lock files: include in repo but exclude from language stats
+*.lock linguist-generated=true

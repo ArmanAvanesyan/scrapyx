@@ -26,6 +26,8 @@ uv add -e ./libs/scrapyx-mw
 # or publish and: uv add scrapyx-mw
 ```
 
+Only **Scrapy** and **Twisted** are required; the resolver will reuse already-installed versions. For browser impersonation (curl_cffi), use: `uv add scrapyx-mw[curl-cffi]`.
+
 ## 🚀 Features
 
 ### Core Middlewares
@@ -173,8 +175,17 @@ Then tweak behavior using flags:
 | `CAPTCHA_WEBHOOK_URL`         | str   | `http://127.0.0.1:6801/webhook` | Webhook receiver URL                                                          |
 | `CAPTCHA_*` knobs             | mixed |                    see defaults | TTL, polling delays, HTTP timeouts/retries                                    |
 | `SESSION_HEADERS`             | dict  |                            `{}` | Global default headers (overridden by per-spider `service_config["HEADERS"]`) |
+| `SCRAPYX_CURL_CFFI_ENABLED`   | bool  |                         `False` | Enable CurlCffi **download handler** (opt-in: per request or global)        |
+| `SCRAPYX_CURL_CFFI_MIDDLEWARE_ENABLED` | bool | `False` | Enable CurlCffi **middleware** (opt-out: all requests use curl_cffi unless disabled in meta) |
 
-The Add-on composes `DOWNLOADER_MIDDLEWARES` / `SPIDER_MIDDLEWARES` with **"addon"** priority and avoids overwriting user-set values.
+The Add-on composes `DOWNLOADER_MIDDLEWARES` / `SPIDER_MIDDLEWARES` / `DOWNLOAD_HANDLERS` with **"addon"** priority and avoids overwriting user-set values.
+
+### CurlCffi (browser impersonation)
+
+Optional support for [curl_cffi](https://github.com/yifeikong/curl_cffi) for browser impersonation on anti-bot sites. Install the extra when using the handler or middleware: `uv pip install scrapyx-mw[curl-cffi]` or `uv pip install curl-cffi`.
+
+- **Handler** (`SCRAPYX_CURL_CFFI_ENABLED=True`): opt-in per request via `request.meta['use_curl_cffi'] = True` or globally; keeps the full download pipeline.
+- **Middleware** (`SCRAPYX_CURL_CFFI_MIDDLEWARE_ENABLED=True`): opt-out—all requests use curl_cffi unless `request.meta['use_curl_cffi'] = False`. Choose one approach per project (handler or middleware).
 
 ### Compatibility notes
 

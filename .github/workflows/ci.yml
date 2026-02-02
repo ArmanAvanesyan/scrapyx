@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.8.0"
+
+      - name: Cache UV dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-ci-${{ hashFiles('**/pyproject.toml', '**/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-ci-
+
+      - name: Ruff format (scrapyx-core)
+        run: |
+          cd packages/scrapyx-core && uv sync && uv run ruff format --check src/
+
+      - name: Ruff format (scrapyx-mw)
+        run: |
+          cd packages/scrapyx-mw && uv sync --extra dev && uv run ruff format --check src/ tests/
+
+      - name: Ruff lint (scrapyx-core)
+        run: |
+          cd packages/scrapyx-core && uv run ruff check src/
+
+      - name: Ruff lint (scrapyx-mw)
+        run: |
+          cd packages/scrapyx-mw && uv run ruff check src/ tests/
+
+      - name: Pyright (scrapyx-core)
+        run: |
+          cd packages/scrapyx-core && uv run pyright src/
+
+      - name: Pyright (scrapyx-mw)
+        run: |
+          cd packages/scrapyx-mw && uv run pyright src/
+
+      - name: Bandit (scrapyx-core)
+        run: |
+          cd packages/scrapyx-core && uv run bandit -r src/ -c pyproject.toml -ll
+
+      - name: Bandit (scrapyx-mw)
+        run: |
+          cd packages/scrapyx-mw && uv run bandit -r src/ tests/ -c pyproject.toml -ll
+
+      - name: Mypy (scrapyx-core)
+        run: |
+          cd packages/scrapyx-core && uv run mypy src/
+
+      - name: Tests (scrapyx-mw)
+        run: |
+          cd packages/scrapyx-mw && uv sync --extra dev && uv run pytest tests/ -v
+
+      - name: Create venv and install build
+        run: |
+          cd "$GITHUB_WORKSPACE" && uv venv && uv pip install build
+
+      - name: Build all packages
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p dist-ci
+          for pkg_dir in packages/*/; do
+            if [ -f "$pkg_dir/pyproject.toml" ]; then
+              echo "Building package in $pkg_dir"
+              (cd "$pkg_dir" && ../../.venv/bin/python -m build --outdir ../../dist-ci)
+            fi
+          done

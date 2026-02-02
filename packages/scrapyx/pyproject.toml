@@ -1,6 +1,6 @@
 [project]
 name = "scrapyx-pkgs"
-version = "0.1.1"
+version = "0.2.0"
 description = "ScrapyX package suite - installs scrapyx-core and scrapyx-mw by default"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -12,20 +12,19 @@ dependencies = [
     "scrapyx-mw",
 ]
 
-# Optional: minimal installations for specific use cases
+# Optional: minimal installations and passthrough extras
 [project.optional-dependencies]
 core = ["scrapyx-core"]
 mw = ["scrapyx-mw"]
 minimal = []  # Just the namespace, no components
+webhook = ["scrapyx-core[webhook]"]
+completion = ["scrapyx-core[completion]"]
+curl-cffi = ["scrapyx-mw[curl-cffi]"]
 
 [build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.21.1"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["scrapyx*"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/scrapyx"]
 

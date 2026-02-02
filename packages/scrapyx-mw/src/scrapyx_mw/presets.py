@@ -27,6 +27,9 @@ def apply_downloader_middlewares(settings: Dict[str, Any], cfg: ScrapyXConfig) -
     elif cfg.captcha == "webhook" and cfg.captcha_enabled:
         mw["scrapyx_mw.middlewares.captcha_webhook.WebhookCaptchaMiddleware"] = cfg.prio_captcha_webhook
 
+    if cfg.curl_cffi:
+        mw["scrapyx_mw.middlewares.curl_cffi.CurlCffiMiddleware"] = cfg.prio_curl_cffi
+
     # Surface cfg into settings for middlewares to read
     settings.setdefault("SCRAPYX", {})
     settings["SCRAPYX"].update(vars(cfg))

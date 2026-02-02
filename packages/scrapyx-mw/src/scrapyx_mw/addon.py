@@ -17,6 +17,8 @@ ADDONS = {
 #   SCRAPYX_DEBUG_ENABLED=False
 #   SCRAPYX_CAPTCHA_MODE="none"        # "none" | "polling" | "webhook"
 #   SCRAPYX_CAPTCHA_ENABLED=False
+#   SCRAPYX_CURL_CFFI_ENABLED=False   # CurlCffi download handler (opt-in)
+#   SCRAPYX_CURL_CFFI_MIDDLEWARE_ENABLED=False  # CurlCffi middleware (opt-out)
 #   CAPTCHA_ENABLED (alias), CAPTCHA_API_KEY, CAPTCHA_WEBHOOK_URL, etc.
 
 Notes:
@@ -52,6 +54,8 @@ class ScrapyxAddon:
         debug_on     = getbool("SCRAPYX_DEBUG_ENABLED", False)
         proxy_rotation_on = getbool("SCRAPYX_PROXY_ROTATION_ENABLED", False)
         smart_retry_on = getbool("SCRAPYX_SMART_RETRY_ENABLED", False)
+        curl_cffi_handler_on = getbool("SCRAPYX_CURL_CFFI_ENABLED", False)
+        curl_cffi_mw_on = getbool("SCRAPYX_CURL_CFFI_MIDDLEWARE_ENABLED", False)
 
         captcha_mode     = getstr("SCRAPYX_CAPTCHA_MODE", "none")  # "none" | "polling" | "webhook"
         # Respect both our namespaced flag and the canonical one
@@ -85,6 +89,9 @@ class ScrapyxAddon:
             elif captcha_mode == "webhook":
                 dmw.setdefault("scrapyx_mw.middlewares.captcha_webhook.WebhookCaptchaMiddleware", 761)
 
+        if curl_cffi_mw_on:
+            dmw.setdefault("scrapyx_mw.middlewares.curl_cffi.CurlCffiMiddleware", 706)
+
         # Save stacks back with "addon" priority, so user values still win
         settings.set("DOWNLOADER_MIDDLEWARES", dmw, priority="addon")
         settings.set("SPIDER_MIDDLEWARES", smw, priority="addon")
@@ -93,6 +100,15 @@ class ScrapyxAddon:
         def setdefault(name: str, value: Any) -> None:
             if settings.get(name, None) is None:
                 settings.set(name, value, priority="addon")
+
+        # ---- Download handlers (curl_cffi for browser impersonation) ----
+        if curl_cffi_handler_on:
+            handlers: Dict[str, str] = dict(settings.getdict("DOWNLOAD_HANDLERS") or {})
+            handler_path = "scrapyx_mw.downloadhandlers.curl_cffi.CurlCffiDownloadHandler"
+            handlers.setdefault("https", handler_path)
+            handlers.setdefault("http", handler_path)
+            settings.set("DOWNLOAD_HANDLERS", handlers, priority="addon")
+            setdefault("CURL_CFFI_ENABLED", True)
 
         setdefault("CAPTCHA_ENABLED", captcha_enabled)
         # Support both SCRAPYX_* and CAPTCHA_* prefixed settings for consistency

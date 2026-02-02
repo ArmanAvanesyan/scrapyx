@@ -39,3 +39,7 @@ class ScrapyXConfig:
     prio_debug: int = 740
     prio_captcha_poll: int = 760
     prio_captcha_webhook: int = 761
+    prio_curl_cffi: int = 706
+
+    # CurlCffi middleware (browser impersonation)
+    curl_cffi: bool = False

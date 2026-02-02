@@ -28,3 +28,18 @@ Optionally, set `SCRAPYX_SERVICES_FILE=/path/to/services.json` to load/merge ext
 
 This package is **middleware-agnostic** and pairs well with `scrapyx-mw` (add-on + middlewares).
 
+## Install and optional extras
+
+Base usage (BaseServiceSpider, ServiceRegistry, config) requires only the default install:
+
+```bash
+uv add scrapyx-core
+# or: pip install scrapyx-core
+```
+
+Extensions that need extra dependencies:
+
+- **WebhookExtension** (webhook callbacks on spider close): `uv add scrapyx-core[webhook]` or `pip install scrapyx-core[webhook]`
+- **CompletionPublisherExtension** (FastStream/RabbitMQ/Redis): `uv add scrapyx-core[completion]` or `pip install scrapyx-core[completion]`
+- Both: `uv add scrapyx-core[webhook,completion]`
+
