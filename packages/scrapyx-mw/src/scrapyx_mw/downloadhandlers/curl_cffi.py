@@ -14,6 +14,12 @@ Usage:
     Or enable per-request via meta:
     request.meta['use_curl_cffi'] = True
     request.meta['curl_cffi_impersonate'] = 'chrome110'  # Optional
+
+    To force HTTP version (e.g. HTTP/1.1 for servers with HTTP/2 issues):
+    request.meta['curl_cffi_http_version'] = 'v1'  # v1, v2, v3, v3only
+
+    For advanced options:
+    request.meta['curl_cffi_curl_options'] = {CURLOPT_HTTP_VERSION: CURL_HTTP_VERSION_1_1}
 """
 
 import logging
@@ -136,6 +142,14 @@ class CurlCffiDownloadHandler(HTTP11DownloadHandler):
                 kwargs["data"] = request.formdata
             else:
                 kwargs["data"] = request.body
+
+        # Pass http_version from meta if present (e.g. "v1" for HTTP/1.1)
+        if "curl_cffi_http_version" in request.meta:
+            kwargs["http_version"] = request.meta["curl_cffi_http_version"]
+
+        # Pass curl_options from meta if present
+        if "curl_cffi_curl_options" in request.meta:
+            kwargs["curl_options"] = request.meta["curl_cffi_curl_options"]
 
         try:
             # Make request with curl_cffi

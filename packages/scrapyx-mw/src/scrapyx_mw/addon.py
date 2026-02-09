@@ -85,7 +85,7 @@ class ScrapyxAddon:
             dmw.setdefault("scrapyx_mw.middlewares.session.SessionMiddleware", 705)
         if api_req_on:
             dmw.setdefault(
-                "scrapyx_mw.middlewares.api_request.ApiRequestMiddleware", 710
+                "scrapyx_mw.middlewares.api_request.ApiRequestMiddleware", 706
             )
         if debug_on:
             dmw.setdefault("scrapyx_mw.middlewares.debug.DebugRequestMiddleware", 740)
@@ -111,7 +111,7 @@ class ScrapyxAddon:
                 )
 
         if curl_cffi_mw_on:
-            dmw.setdefault("scrapyx_mw.middlewares.curl_cffi.CurlCffiMiddleware", 706)
+            dmw.setdefault("scrapyx_mw.middlewares.curl_cffi.CurlCffiMiddleware", 708)
 
         # Save stacks back with "addon" priority, so user values still win
         settings.set("DOWNLOADER_MIDDLEWARES", dmw, priority="addon")

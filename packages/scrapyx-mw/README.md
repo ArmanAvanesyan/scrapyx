@@ -187,6 +187,14 @@ Optional support for [curl_cffi](https://github.com/yifeikong/curl_cffi) for bro
 - **Handler** (`SCRAPYX_CURL_CFFI_ENABLED=True`): opt-in per request via `request.meta['use_curl_cffi'] = True` or globally; keeps the full download pipeline.
 - **Middleware** (`SCRAPYX_CURL_CFFI_MIDDLEWARE_ENABLED=True`): opt-out—all requests use curl_cffi unless `request.meta['use_curl_cffi'] = False`. Choose one approach per project (handler or middleware).
 
+**Per-request meta keys** (both handler and middleware):
+
+| Meta key | Description |
+| -------- | ----------- |
+| `curl_cffi_impersonate` | Browser target, e.g. `"chrome110"` (default). |
+| `curl_cffi_http_version` | Force HTTP version: `"v1"` (HTTP/1.1), `"v2"` (HTTP/2), `"v3"`, `"v3only"`. Use `"v1"` to avoid HTTP/2 stream closure errors (curl err 92) on some servers. |
+| `curl_cffi_curl_options` | Optional dict of libcurl options, e.g. `{CURLOPT_HTTP_VERSION: CURL_HTTP_VERSION_1_1}`. |
+
 ### Compatibility notes
 
 * Reads per-spider config from `SERVICES[SPIDER_NAME_UPPER]` (same as your `compliance_scraper`).
