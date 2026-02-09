@@ -167,9 +167,12 @@ class CurlCffiMiddleware:
         else:
             response_class = TextResponse
 
-        # Convert headers
+        # Convert headers, stripping Content-Encoding since curl_response.content is already decompressed
+        # (otherwise Scrapy's HttpCompressionMiddleware tries to decompress again -> BadGzipFile)
         headers = {}
         for key, value in curl_response.headers.items():
+            if key.lower() == "content-encoding":
+                continue
             headers[key.encode("utf-8")] = value.encode("utf-8")
 
         return response_class(

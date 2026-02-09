@@ -86,6 +86,30 @@ class TestCurlCffiDownloadHandler:
             assert call_kwargs["curl_options"] == curl_options
             assert response.status == 200
 
+    def test_content_encoding_stripped_from_response(self):
+        """Content-Encoding is stripped since curl_response.content is already decompressed."""
+        from scrapy.core.downloader.handlers.http11 import HTTP11DownloadHandler
+
+        mock_response = MagicMock()
+        mock_response.url = "http://example.com"
+        mock_response.status_code = 200
+        mock_response.headers = {
+            "content-type": "text/html",
+            "content-encoding": "gzip",
+        }
+        mock_response.content = b"<html></html>"
+        mock_response.encoding = "utf-8"
+
+        with patch.object(
+            HTTP11DownloadHandler, "__init__", lambda self, s, c=None: None
+        ):
+            settings = MagicMock()
+            settings.getbool.return_value = True
+            handler = CurlCffiDownloadHandler(settings)
+            request = Request("http://example.com", meta={"use_curl_cffi": True})
+            response = handler._curl_response_to_scrapy_response(mock_response, request)
+        assert b"Content-Encoding" not in response.headers
+
 
 class TestCurlCffiMiddleware:
     """Test CurlCffiMiddleware."""
@@ -160,3 +184,21 @@ class TestCurlCffiMiddleware:
             call_kwargs = mock_request.call_args[1]
             assert call_kwargs["http_version"] == "v1"
             assert call_kwargs["curl_options"] == curl_options
+
+    def test_content_encoding_stripped_from_response(self):
+        """Content-Encoding is stripped since curl_response.content is already decompressed."""
+        mock_response = MagicMock()
+        mock_response.url = "http://example.com"
+        mock_response.status_code = 200
+        mock_response.headers = {
+            "content-type": "text/html",
+            "content-encoding": "gzip",
+        }
+        mock_response.content = b"<html></html>"
+        mock_response.encoding = "utf-8"
+
+        settings = MagicMock()
+        middleware = CurlCffiMiddleware(settings)
+        request = Request("http://example.com")
+        response = middleware._curl_response_to_scrapy_response(mock_response, request)
+        assert b"Content-Encoding" not in response.headers
