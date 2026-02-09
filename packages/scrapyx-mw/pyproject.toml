@@ -1,8 +1,8 @@
 [project]
 name = "scrapyx-mw"
-version = "0.2.0"
+version = "0.2.1"
 description = "Composable Scrapy middlewares: API/session headers, debug, captcha polling/webhook, proxy rotation, smart retry."
-authors = [{ name = "Your Org" }]
+authors = [{ name = ArmanAvanesyan }]
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

@@ -1,10 +1,10 @@
 [project]
 name = "scrapyx-pkgs"
-version = "0.2.0"
+version = "0.2.1"
 description = "ScrapyX package suite - installs scrapyx-core and scrapyx-mw by default"
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{ name = "Your Org" }]
+authors = [{ name = "ArmanAvanesyan" }]
 
 # Default: install all components
 dependencies = [
