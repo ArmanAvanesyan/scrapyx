@@ -56,13 +56,16 @@ class TestCurlCffiDownloadHandler:
         mock_response.content = b"<html></html>"
         mock_response.encoding = "utf-8"
 
-        with patch.object(
-            HTTP11DownloadHandler, "__init__", lambda self, s, c=None: None
-        ), patch.object(
-            curl_cffi_mod.curl_requests,
-            "request",
-            return_value=mock_response,
-        ) as mock_request:
+        with (
+            patch.object(
+                HTTP11DownloadHandler, "__init__", lambda self, s, c=None: None
+            ),
+            patch.object(
+                curl_cffi_mod.curl_requests,
+                "request",
+                return_value=mock_response,
+            ) as mock_request,
+        ):
             settings = MagicMock()
             settings.getbool.return_value = True
             handler = CurlCffiDownloadHandler(settings)
